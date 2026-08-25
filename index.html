@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التقاط صورة</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 25px;
+      background: #f5f5f5;
+    }
+
+    video, canvas {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 15px;
+      margin: 15px auto;
+    }
+
+    button {
+      padding: 14px 25px;
+      margin: 8px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 17px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>📷 التقاط صورة</h2>
+  <p>اضغط على الزر واسمح للمتصفح باستخدام الكاميرا.</p>
+
+  <button onclick="startCamera()">فتح الكاميرا</button>
+
+  <video id="video" autoplay playsinline hidden></video>
+
+  <br>
+
+  <button id="capture" onclick="takePhoto()" hidden>
+    التقاط الصورة
+  </button>
+
+  <canvas id="canvas" hidden></canvas>
+
+  <script>
+    let stream;
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false
+        });
+
+        const video = document.getElementById("video");
+
+        video.srcObject = stream;
+        video.hidden = false;
+
+        document.getElementById("capture").hidden = false;
+
+      } catch (error) {
+        alert("لم يتم السماح باستخدام الكاميرا.");
+        console.error(error);
+      }
+    }
+
+    function takePhoto() {
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0);
+
+      canvas.hidden = false;
+
+      // إيقاف الكاميرا بعد التقاط الصورة
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    }
+  </script>
+
+</body>
+  </html>
