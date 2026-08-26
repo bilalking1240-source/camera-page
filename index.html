@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الكاميرا</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #ccc;
+      text-align: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 14px 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 15px 0;
+    }
+
+    video {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 15px;
+      background: #000;
+      display: none;
+    }
+
+    #status {
+      margin-top: 10px;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📷 الكاميرا</h1>
+
+  <p>اضغط على الزر أدناه للسماح للمتصفح باستخدام الكاميرا.</p>
+
+  <button id="startCamera">تشغيل الكاميرا</button>
+
+  <video id="camera" autoplay playsinline></video>
+
+  <div id="status"></div>
+
+  <script>
+    const button = document.getElementById("startCamera");
+    const video = document.getElementById("camera");
+    const status = document.getElementById("status");
+
+    button.addEventListener("click", async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          status.textContent = "المتصفح لا يدعم تشغيل الكاميرا.";
+          return;
+        }
+
+        status.textContent = "جاري طلب إذن الكاميرا...";
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+
+        video.srcObject = stream;
+        video.style.display = "block";
+        status.textContent = "تم تشغيل الكاميرا بنجاح.";
+
+      } catch (error) {
+        console.error(error);
+
+        if (error.name === "NotAllowedError") {
+          status.textContent = "تم رفض إذن الكاميرا. اسمح بالكاميرا من إعدادات المتصفح.";
+        } else if (error.name === "NotFoundError") {
+          status.textContent = "لم يتم العثور على كاميرا.";
+        } else {
+          status.textContent = "تعذر تشغيل الكاميرا: " + error.name;
+        }
+      }
+    });
+  </script>
+
+</body>
+  </html>
