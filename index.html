@@ -3,81 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الكاميرا</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-
-    video, canvas {
-      width: 100%;
-      max-width: 500px;
-      border-radius: 15px;
-    }
-
-    button {
-      margin: 15px 5px;
-      padding: 14px 25px;
-      border: 0;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-  </style>
+  <title>التقاط صورة</title>
 </head>
-
 <body>
 
-  <h2>📷 الكاميرا</h2>
+<h2>📸 التقاط صورة</h2>
 
-  <video id="video" autoplay playsinline></video>
+<button id="cameraBtn">السماح بالكاميرا</button>
+<button id="takeBtn" disabled>📸 التقاط الصورة</button>
 
-  <br>
+<canvas id="canvas" style="display:none;"></canvas>
 
-  <button id="start">تشغيل الكاميرا</button>
-  <button id="take" disabled>📸 التقاط صورة</button>
+<p id="status"></p>
 
-  <canvas id="canvas" style="display:none;"></canvas>
+<script>
+const cameraBtn = document.getElementById("cameraBtn");
+const takeBtn = document.getElementById("takeBtn");
+const canvas = document.getElementById("canvas");
+const status = document.getElementById("status");
 
-  <h3 id="result"></h3>
+let stream;
+let video;
 
-  <script>
-    const video = document.getElementById("video");
-    const canvas = document.getElementById("canvas");
-    const start = document.getElementById("start");
-    const take = document.getElementById("take");
-    const result = document.getElementById("result");
+cameraBtn.onclick = async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: true
+    });
 
-    let stream;
+    // الكاميرا تعمل لكن بدون عرض المعاينة
+    video = document.createElement("video");
+    video.srcObject = stream;
+    video.muted = true;
+    await video.play();
 
-    start.onclick = async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true
-        });
+    takeBtn.disabled = false;
+    status.textContent = "تم السماح بالكاميرا ✅ اضغط التقاط الصورة";
+  } catch (error) {
+    status.textContent = "لم يتم السماح بالكاميرا ❌";
+  }
+};
 
-        video.srcObject = stream;
-        take.disabled = false;
-        result.textContent = "الكاميرا تعمل ✅";
-      } catch (error) {
-        result.textContent = "لم يتم السماح باستخدام الكاميرا ❌";
-      }
-    };
+takeBtn.onclick = () => {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
-    take.onclick = () => {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0);
 
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0);
+  // إيقاف الكاميرا بعد الالتقاط
+  stream.getTracks().forEach(track => track.stop());
 
-      canvas.style.display = "block";
-
-      result.textContent = "تم التقاط الصورة ✅";
-    };
-  </script>
+  status.textContent = "تم التقاط الصورة ✅";
+};
+</script>
 
 </body>
 </html>
