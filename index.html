@@ -3,123 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>كاميرا</title>
+  <title>الكاميرا</title>
 
   <style>
     body {
-      background: #111;
-      color: white;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
     }
 
-    video, canvas, img {
+    video, canvas {
       width: 100%;
       max-width: 500px;
       border-radius: 15px;
-      margin: 10px auto;
     }
 
     button {
-      padding: 12px 20px;
-      margin: 5px;
-      border: none;
+      margin: 15px 5px;
+      padding: 14px 25px;
+      border: 0;
       border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    #camera {
-      display: none;
-    }
-
-    #photo {
-      display: none;
+      font-size: 18px;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>📷 الكاميرا</h1>
+  <h2>📷 الكاميرا</h2>
 
-  <p>اضغط تشغيل للسماح باستخدام الكاميرا.</p>
+  <video id="video" autoplay playsinline></video>
 
-  <button onclick="startCamera()">تشغيل الكاميرا</button>
-  <button onclick="takePhoto()">📸 التقاط صورة</button>
-  <button onclick="switchCamera()">🔄 تبديل الكاميرا</button>
-  <button onclick="stopCamera()">🛑 إيقاف</button>
+  <br>
 
-  <video id="camera" autoplay playsinline></video>
+  <button id="start">تشغيل الكاميرا</button>
+  <button id="take" disabled>📸 التقاط صورة</button>
 
   <canvas id="canvas" style="display:none;"></canvas>
 
-  <img id="photo" alt="الصورة الملتقطة">
-
-  <p id="status"></p>
+  <h3 id="result"></h3>
 
   <script>
-    let stream = null;
-    let facingMode = "user";
-
-    const video = document.getElementById("camera");
+    const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
-    const photo = document.getElementById("photo");
-    const status = document.getElementById("status");
+    const start = document.getElementById("start");
+    const take = document.getElementById("take");
+    const result = document.getElementById("result");
 
-    async function startCamera() {
+    let stream;
+
+    start.onclick = async () => {
       try {
-        stopCamera();
-
         stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: facingMode
-          },
-          audio: false
+          video: true
         });
 
         video.srcObject = stream;
-        video.style.display = "block";
-        status.textContent = "الكاميرا تعمل.";
-
+        take.disabled = false;
+        result.textContent = "الكاميرا تعمل ✅";
       } catch (error) {
-        status.textContent = "تعذر تشغيل الكاميرا: " + error.name;
+        result.textContent = "لم يتم السماح باستخدام الكاميرا ❌";
       }
-    }
+    };
 
-    function takePhoto() {
-      if (!stream) {
-        status.textContent = "شغّل الكاميرا أولاً.";
-        return;
-      }
-
+    take.onclick = () => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      const context = canvas.getContext("2d");
-      context.drawImage(video, 0, 0);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0);
 
-      photo.src = canvas.toDataURL("image/png");
-      photo.style.display = "block";
+      canvas.style.display = "block";
 
-      status.textContent = "تم التقاط الصورة.";
-    }
-
-    async function switchCamera() {
-      facingMode = facingMode === "user" ? "environment" : "user";
-      await startCamera();
-    }
-
-    function stopCamera() {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-      }
-
-      video.srcObject = null;
-      video.style.display = "none";
-    }
+      result.textContent = "تم التقاط الصورة ✅";
+    };
   </script>
 
 </body>
